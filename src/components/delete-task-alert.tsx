@@ -11,7 +11,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { deleteTask } from '@/lib/actions';
+import { softDeleteTaskAction } from '@/lib/actions';
 import { useTransition } from 'react';
 import { Button } from './ui/button';
 
@@ -26,7 +26,7 @@ export function DeleteTaskAlert({
 
   const handleDelete = () => {
     startTransition(() => {
-      deleteTask(taskId);
+      softDeleteTaskAction(taskId);
     });
   };
 
@@ -35,10 +35,9 @@ export function DeleteTaskAlert({
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete this task
-            from the list.
+            This will move the task to the bin. You can restore it later.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -48,7 +47,7 @@ export function DeleteTaskAlert({
             onClick={handleDelete}
             disabled={isPending}
           >
-            {isPending ? 'Deleting...' : 'Delete'}
+            {isPending ? 'Moving to bin...' : 'Move to Bin'}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

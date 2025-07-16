@@ -2,12 +2,13 @@ import { getTasks, getTopTasks } from '@/lib/tasks';
 import { TaskList } from '@/components/task-list';
 import { TaskFormDialog } from '@/components/task-form-dialog';
 import { TaskSuggestion } from '@/components/task-suggestion';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { DummyLoginButton } from '@/components/dummy-login-button';
 import { TopTasksFilter } from '@/components/top-tasks-filter';
+import Link from 'next/link';
 
 interface HomeProps {
   searchParams?: {
@@ -39,6 +40,12 @@ export default async function Home({ searchParams }: HomeProps) {
                 </Button>
               }
             />
+            <Button variant="outline" size="icon" asChild>
+              <Link href="/bin">
+                <Trash2 className="h-4 w-4" />
+                <span className="sr-only">Deleted Tasks</span>
+              </Link>
+            </Button>
             <ThemeToggle />
             <DummyLoginButton />
           </div>

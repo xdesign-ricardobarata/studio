@@ -4,6 +4,8 @@ import { z } from 'zod';
 import {
   createTask as apiCreateTask,
   deleteTask as apiDeleteTask,
+  softDeleteTask as apiSoftDeleteTask,
+  restoreTask as apiRestoreTask,
   updateTask as apiUpdateTask,
 } from '@/lib/tasks';
 import { revalidatePath } from 'next/cache';
@@ -54,6 +56,7 @@ export async function updateTask(id: string, formData: FormData) {
 
   await apiUpdateTask(id, validatedFields.data);
   revalidatePath('/');
+  revalidatePath('/bin');
 }
 
 export async function updateTaskStatus(id: string, status: TaskStatus) {
@@ -61,7 +64,19 @@ export async function updateTaskStatus(id: string, status: TaskStatus) {
   revalidatePath('/');
 }
 
+export async function softDeleteTaskAction(id: string) {
+  await apiSoftDeleteTask(id);
+  revalidatePath('/');
+  revalidatePath('/bin');
+}
+
+export async function restoreTaskAction(id: string) {
+  await apiRestoreTask(id);
+  revalidatePath('/');
+  revalidatePath('/bin');
+}
+
 export async function deleteTask(id: string) {
   await apiDeleteTask(id);
-  revalidatePath('/');
+  revalidatePath('/bin');
 }

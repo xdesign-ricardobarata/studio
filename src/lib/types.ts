@@ -8,4 +8,5 @@ export type Task = {
   dueDate: Date | null;
   status: TaskStatus;
   createdAt: Date;
+  deletedAt: Date | null;
 };
