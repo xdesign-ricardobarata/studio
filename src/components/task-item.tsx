@@ -76,7 +76,7 @@ export function TaskItem({ task }: { task: Task }) {
             task.status === 'in-progress' && 'border-primary/50 bg-primary/10 text-primary',
             task.status === 'completed' && 'border-green-500/50 bg-green-500/10 text-green-700',
            )}>
-            {task.status.replace('-', ' ')}
+            {/* {task.status.replace('-', ' ')} */}
           </Badge>
         </div>
       </div>

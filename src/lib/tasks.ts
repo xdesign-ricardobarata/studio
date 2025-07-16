@@ -1,136 +1,67 @@
-import type { Task, TaskStatus } from '@/lib/types';
+import type { Task } from '@/lib/types';
 
-// In-memory store for tasks
-let tasks: Task[] = [
-    {
-        id: '1',
-        description: 'Set up the project structure for TaskJuggler',
-        dueDate: new Date(new Date().setDate(new Date().getDate() + 1)),
-        status: 'completed',
-        createdAt: new Date(new Date().setDate(new Date().getDate() - 3)),
-        deletedAt: null,
-    },
-    {
-        id: '2',
-        description: 'Design the main UI components using shadcn/ui',
-        dueDate: new Date(new Date().setDate(new Date().getDate() + 2)),
-        status: 'in-progress',
-        createdAt: new Date(new Date().setDate(new Date().getDate() - 2)),
-        deletedAt: null,
-    },
-    {
-        id: '3',
-        description: 'Implement server actions for CRUD operations',
-        dueDate: new Date(new Date().setDate(new Date().getDate() + 3)),
-        status: 'open',
-        createdAt: new Date(new Date().setDate(new Date().getDate() - 1)),
-        deletedAt: null,
-    },
-    {
-        id: '4',
-        description: 'Integrate the GenAI task suggestion feature',
-        dueDate: null,
-        status: 'open',
-        createdAt: new Date(),
-        deletedAt: null,
-    },
-    {
-        id: '5',
-        description: 'Deploy the app to production',
-        dueDate: new Date(new Date().setDate(new Date().getDate() + 7)),
-        status: 'open',
-        createdAt: new Date(new Date().setDate(new Date().getDate() - 5)),
-        deletedAt: null,
-    },
-    {
-        id: '6',
-        description: 'Write end-to-end tests',
-        dueDate: new Date(new Date().setDate(new Date().getDate() + 5)),
-        status: 'open',
-        createdAt: new Date(new Date().setDate(new Date().getDate() - 4)),
-        deletedAt: null,
-    },
-    {
-        id: '7',
-        description: 'Review PR from a colleague',
-        dueDate: new Date(new Date().setDate(new Date().getDate() + 1)),
-        status: 'in-progress',
-        createdAt: new Date(new Date().setDate(new Date().getDate() - 1)),
-        deletedAt: null,
-    },
-    {
-        id: '8',
-        description: 'This is a deleted task',
-        dueDate: new Date(),
-        status: 'completed',
-        createdAt: new Date(new Date().setDate(new Date().getDate() - 10)),
-        deletedAt: new Date(),
-    },
-];
-
-const getSortedTasks = () => tasks.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+const API_BASE = 'http://localhost:8080/api/tasks';
 
 export async function getTasks(): Promise<Task[]> {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 300));
-  return getSortedTasks().filter(task => !task.deletedAt);
-}
-
-export async function getDeletedTasks(): Promise<Task[]> {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 300));
-  return getSortedTasks().filter(task => !!task.deletedAt);
+  const res = await fetch(API_BASE);
+  if (!res.ok) throw new Error('Failed to fetch tasks');
+  return await res.json();
 }
 
 export async function getTopTasks(n: number): Promise<Task[]> {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return getSortedTasks().filter(task => !task.deletedAt).slice(0, n);
+  const res = await fetch(`${API_BASE}/top?n=${n}`);
+  if (!res.ok) throw new Error('Failed to fetch top tasks');
+  return await res.json();
 }
 
-export async function getTaskById(id: string): Promise<Task | undefined> {
-    return tasks.find(task => task.id === id);
+export async function getTaskById(id: string | number): Promise<Task | undefined> {
+  const res = await fetch(`${API_BASE}/${id}`);
+  if (!res.ok) return undefined;
+  return await res.json();
 }
 
 export async function createTask(data: Omit<Task, 'id' | 'createdAt' | 'deletedAt'>): Promise<Task> {
-  const newTask: Task = {
-    id: crypto.randomUUID(),
-    ...data,
-    createdAt: new Date(),
-    deletedAt: null,
-  };
-  tasks.push(newTask);
-  return newTask;
+  const res = await fetch(API_BASE, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: data.description }),
+  });
+  if (!res.ok) throw new Error('Failed to create task');
+  return await res.json();
 }
 
-export async function updateTask(id: string, data: Partial<Omit<Task, 'id' | 'createdAt' | 'deletedAt'>>): Promise<Task | null> {
-  const taskIndex = tasks.findIndex(task => task.id === id);
-  if (taskIndex === -1) {
-    return null;
-  }
-  tasks[taskIndex] = { ...tasks[taskIndex], ...data };
-  return tasks[taskIndex];
+export async function updateTask(id: string | number, data: Partial<Omit<Task, 'id' | 'createdAt' | 'deletedAt'>>): Promise<Task | null> {
+  const res = await fetch(`${API_BASE}/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: data.description }),
+  });
+  if (!res.ok) return null;
+  return await res.json();
 }
 
-export async function softDeleteTask(id: string): Promise<Task | null> {
-  const taskIndex = tasks.findIndex(task => task.id === id);
-  if (taskIndex === -1) {
-    return null;
-  }
-  tasks[taskIndex].deletedAt = new Date();
-  return tasks[taskIndex];
+export async function deleteTask(id: string | number): Promise<{ success: boolean }> {
+  const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
+  return { success: res.status === 204 };
 }
 
-export async function restoreTask(id: string): Promise<Task | null> {
-    const taskIndex = tasks.findIndex(task => task.id === id);
-    if (taskIndex === -1) {
-        return null;
-    }
-    tasks[taskIndex].deletedAt = null;
-    return tasks[taskIndex];
+export async function markTaskAsDone(id: string | number): Promise<boolean> {
+  const res = await fetch(`${API_BASE}/${id}/done`, { method: 'PATCH' });
+  return res.status === 204;
 }
 
-export async function deleteTask(id: string): Promise<{ success: boolean }> {
-  const initialLength = tasks.length;
-  tasks = tasks.filter(task => task.id !== id);
-  return { success: tasks.length < initialLength };
+// The following are not supported by the backend, so return empty/null.
+export async function getDeletedTasks(): Promise<Task[]> {
+  return [];
+}
+
+export async function softDeleteTask(id: string | number): Promise<Task | null> {
+  // No soft delete endpoint, so use hard delete
+  const result = await deleteTask(id);
+  return result.success ? { id } as Task : null;
+}
+
+export async function restoreTask(id: string | number): Promise<Task | null> {
+  // No restore endpoint, so return null
+  return null;
 }
