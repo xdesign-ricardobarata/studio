@@ -5,6 +5,7 @@ import { TaskSuggestion } from '@/components/task-suggestion';
 import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default async function Home() {
   const tasks = await getTasks();
@@ -29,6 +30,7 @@ export default async function Home() {
                 </Button>
               }
             />
+            <ThemeToggle />
           </div>
         </div>
       </header>
