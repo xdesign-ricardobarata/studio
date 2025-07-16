@@ -6,6 +6,7 @@ import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { DummyLoginButton } from '@/components/dummy-login-button';
 
 export default async function Home() {
   const tasks = await getTasks();
@@ -31,6 +32,7 @@ export default async function Home() {
               }
             />
             <ThemeToggle />
+            <DummyLoginButton />
           </div>
         </div>
       </header>
