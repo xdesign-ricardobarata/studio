@@ -30,12 +30,40 @@ let tasks: Task[] = [
         status: 'open',
         createdAt: new Date(),
     },
+    {
+        id: '5',
+        description: 'Deploy the app to production',
+        dueDate: new Date(new Date().setDate(new Date().getDate() + 7)),
+        status: 'open',
+        createdAt: new Date(new Date().setDate(new Date().getDate() - 5)),
+    },
+    {
+        id: '6',
+        description: 'Write end-to-end tests',
+        dueDate: new Date(new Date().setDate(new Date().getDate() + 5)),
+        status: 'open',
+        createdAt: new Date(new Date().setDate(new Date().getDate() - 4)),
+    },
+    {
+        id: '7',
+        description: 'Review PR from a colleague',
+        dueDate: new Date(new Date().setDate(new Date().getDate() + 1)),
+        status: 'in-progress',
+        createdAt: new Date(new Date().setDate(new Date().getDate() - 1)),
+    },
 ];
+
+const getSortedTasks = () => tasks.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
 export async function getTasks(): Promise<Task[]> {
   // Simulate network delay
   await new Promise(resolve => setTimeout(resolve, 300));
-  return tasks.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  return getSortedTasks();
+}
+
+export async function getTopTasks(n: number): Promise<Task[]> {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return getSortedTasks().slice(0, n);
 }
 
 export async function getTaskById(id: string): Promise<Task | undefined> {
