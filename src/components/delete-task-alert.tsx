@@ -15,18 +15,22 @@ import { softDeleteTaskAction } from '@/lib/actions';
 import { useTransition } from 'react';
 import { Button } from './ui/button';
 
+
 export function DeleteTaskAlert({
+  userId,
   taskId,
   children,
 }: {
+  userId?: string;
   taskId: string;
   children: React.ReactNode;
 }) {
   const [isPending, startTransition] = useTransition();
 
   const handleDelete = () => {
+    if (!userId) return;
     startTransition(() => {
-      softDeleteTaskAction(taskId);
+      softDeleteTaskAction(userId, taskId);
     });
   };
 

@@ -2,9 +2,10 @@
 import type { Task } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Restore, Trash2 } from 'lucide-react';
+import { Undo2, Trash2 } from 'lucide-react';
 import { useTransition } from 'react';
 import { restoreTaskAction, deleteTask } from '@/lib/actions';
+import { useAuth } from '@/hooks/use-auth';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,16 +20,19 @@ import {
 
 export function DeletedTaskItem({ task }: { task: Task }) {
   const [isPending, startTransition] = useTransition();
+  const { user } = useAuth();
 
   const handleRestore = () => {
+    if (!user) return;
     startTransition(() => {
-      restoreTaskAction(task.id);
+      restoreTaskAction(user.uid, task.id);
     });
   };
 
   const handleDeletePermanent = () => {
+    if (!user) return;
     startTransition(() => {
-      deleteTask(task.id);
+      deleteTask(user.uid, task.id);
     });
   };
 
@@ -54,7 +58,7 @@ export function DeletedTaskItem({ task }: { task: Task }) {
           onClick={handleRestore}
           disabled={isPending}
         >
-          <Restore className="h-4 w-4" />
+          <Undo2 className="h-4 w-4" />
           <span className="sr-only">Restore</span>
         </Button>
         <AlertDialog>
@@ -66,25 +70,21 @@ export function DeletedTaskItem({ task }: { task: Task }) {
               disabled={isPending}
             >
               <Trash2 className="h-4 w-4" />
-              <span className="sr-only">Delete Permanently</span>
+              <span className="sr-only">Delete permanently</span>
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete this
-                task.
+                This action cannot be undone. This will permanently delete the
+                task from our servers.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                onClick={handleDeletePermanent}
-                disabled={isPending}
-              >
-                {isPending ? 'Deleting...' : 'Delete Permanently'}
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeletePermanent}>
+                Continue
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

@@ -5,7 +5,9 @@ import type { Task, TaskStatus } from '@/lib/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TaskItem } from '@/components/task-item';
 import { Card, CardContent } from '@/components/ui/card';
-import { ClipboardList } from 'lucide-react';
+import { ClipboardList, Loader2 } from 'lucide-react';
+import { useTasks } from '@/hooks/use-tasks';
+import { useAuth } from '@/hooks/use-auth';
 
 const TABS: { label: string; value: 'all' | TaskStatus }[] = [
   { label: 'All', value: 'all' },
@@ -14,12 +16,41 @@ const TABS: { label: string; value: 'all' | TaskStatus }[] = [
   { label: 'Completed', value: 'completed' },
 ];
 
-export function TaskList({ tasks }: { tasks: Task[] }) {
+
+export function TaskList() {
   const [activeTab, setActiveTab] = useState<'all' | TaskStatus>('all');
+  const { user, loading: authLoading } = useAuth();
+  const { tasks, loading, error } = useTasks();
 
   const filteredTasks = tasks.filter(task =>
     activeTab === 'all' ? true : task.status === activeTab
   );
+
+  if (authLoading || loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 p-8 text-center sm:p-16">
+        <h3 className="text-xl font-semibold">Sign in to view your tasks</h3>
+        <p className="text-muted-foreground">Please log in to see and manage your tasks.</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 p-8 text-center text-destructive sm:p-16">
+        <h3 className="text-xl font-semibold">Error Loading Tasks</h3>
+        <p>{error.message}</p>
+      </div>
+    );
+  }
 
   return (
     <Tabs

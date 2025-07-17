@@ -1,15 +1,26 @@
 'use client';
 
-import type { Task } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Loader2 } from 'lucide-react';
 import { DeletedTaskItem } from './deleted-task-item';
+import { useDeletedTasks } from '@/hooks/use-tasks';
 
-export function DeletedTaskList({ tasks }: { tasks: Task[] }) {
+export function DeletedTaskList() {
+  const { tasks, loading, error } = useDeletedTasks();
+
   return (
     <Card>
       <CardContent className="p-0">
-        {tasks.length > 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center p-8">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center gap-4 p-8 text-center text-destructive sm:p-16">
+            <h3 className="text-xl font-semibold">Error Loading Deleted Tasks</h3>
+            <p>{error.message}</p>
+          </div>
+        ) : tasks.length > 0 ? (
           <div className="divide-y divide-border">
             {tasks.map(task => (
               <DeletedTaskItem key={task.id} task={task} />

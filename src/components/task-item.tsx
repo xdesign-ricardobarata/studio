@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { CalendarIcon, Edit, Trash2 } from 'lucide-react';
 import { updateTaskStatus } from '@/lib/actions';
+import { useAuth } from '@/hooks/use-auth';
 import { useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { TaskFormDialog } from './task-form-dialog';
@@ -28,11 +29,13 @@ const statusConfig: Record<
 
 export function TaskItem({ task }: { task: Task }) {
   const [isPending, startTransition] = useTransition();
+  const { user } = useAuth();
 
   const handleStatusChange = (checked: boolean) => {
+    if (!user) return;
     const newStatus = checked ? 'completed' : 'open';
     startTransition(() => {
-      updateTaskStatus(task.id, newStatus);
+      updateTaskStatus(user.uid, task.id, newStatus);
     });
   };
 
@@ -90,7 +93,7 @@ export function TaskItem({ task }: { task: Task }) {
             </Button>
           }
         />
-        <DeleteTaskAlert taskId={task.id}>
+        <DeleteTaskAlert userId={user?.uid} taskId={task.id}>
           <Button
             variant="ghost"
             size="icon"

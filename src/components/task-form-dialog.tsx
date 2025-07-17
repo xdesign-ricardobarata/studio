@@ -40,6 +40,7 @@ import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { createTask, updateTask } from '@/lib/actions';
+import { useAuth } from '@/hooks/use-auth';
 import type { Task } from '@/lib/types';
 import { TASK_STATUSES } from '@/lib/types';
 import { useState, useTransition, useEffect } from 'react';
@@ -82,7 +83,9 @@ export function TaskFormDialog({ task, trigger }: TaskFormDialogProps) {
     }
   }, [open, task, form]);
 
+  const { user } = useAuth();
   const onSubmit = (values: FormValues) => {
+    if (!user) return;
     startTransition(async () => {
       const formData = new FormData();
       formData.append('description', values.description);
@@ -92,9 +95,9 @@ export function TaskFormDialog({ task, trigger }: TaskFormDialogProps) {
       formData.append('status', values.status);
 
       if (isEditMode) {
-        await updateTask(task.id, formData);
+        await updateTask(user.uid, task.id, formData);
       } else {
-        await createTask(formData);
+        await createTask(user.uid, formData);
       }
       setOpen(false);
     });
